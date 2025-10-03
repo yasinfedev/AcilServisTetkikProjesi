@@ -40,6 +40,13 @@
     <div id="pie_eriskin"></div>
   </div>
 
+    <!-- Hemogram grafiği -->
+  <div class="card span-6">
+    <h3 class="title">Hemogram – Acil vs Hastane</h3>
+    <div id="bar_hemogram"></div>
+  </div>
+
+
   <!-- 2: Dar / Geniş / Ek biyokimya – Acil istem sayıları -->
   <div class="card span-6">
     <h3 class="title">Dar Biyokimya Paneli – Acil İstem Sayıları</h3>
@@ -60,6 +67,32 @@
     <h3 class="title">%30 Üzeri Acil Payı Olan Tetkikler (Acil vs Hastane)</h3>
     <div id="bar_over30"></div>
   </div>
+
+    <!-- Koagülasyon -->
+  <div class="card span-6">
+    <h3 class="title">Koagülasyon Tetkikleri – Acil vs Hastane</h3>
+    <div id="bar_koag"></div>
+  </div>
+
+  <!-- Seroloji -->
+  <div class="card span-6">
+    <h3 class="title">Seroloji – Acil vs Hastane</h3>
+    <div id="bar_seroloji"></div>
+  </div>
+
+  <!-- Kardiyak -->
+  <div class="card span-6">
+    <h3 class="title">Kardiyak Tetkikler – Acil vs Hastane</h3>
+    <div id="bar_kardiyak"></div>
+  </div>
+
+    <!-- Acil serviste yeri olmayan tetkikler -->
+  <div class="card span-12">
+    <h3 class="title">Acil Serviste Yeri Olmayan Tetkikler – Acil vs Hastane</h3>
+    <div id="bar_gereksiz"></div>
+  </div>
+
+
 
   <!-- 3: Tüm testler – Acil vs Hastane, acil payına göre sıralı -->
   <div class="card span-12">
@@ -127,6 +160,8 @@ const ek = [
   {tetkik:"CK", acil:5342, hastane:10444},
   {tetkik:"Amonyak", acil:7, hastane:32}
 ];
+
+  
 
 // Koagülasyon
 const koag = [
@@ -301,6 +336,66 @@ Plotly.newPlot('bar_all', [
     ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}
   });
 })();
+
+  // 7) Hemogram – ikili bar
+(function(){
+  const t = allTests.find(d=>d.tetkik==="Hemogram");
+  Plotly.newPlot('bar_hemogram', [
+    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.acil], name:'Acil Servis', 
+     text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
+    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.hastane], name:'Hastane Toplam', 
+     text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
+  ], {
+    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, 
+    legend:{orientation:'h', y:-0.2}
+  });
+})();
+
+  // 8) Koagülasyon – ikili bar (APTT, D-dimer, PTZ)
+(function(){
+  const arr = koag;
+  Plotly.newPlot('bar_koag', [
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
+     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
+     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+})();
+
+// 9) Seroloji – ikili bar
+(function(){
+  const arr = diger.filter(d=>["Beta HCG","HBS Ag","Anti HCV","Anti HIV"].includes(d.tetkik));
+  Plotly.newPlot('bar_seroloji', [
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
+     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
+     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+})();
+
+// 10) Kardiyak – ikili bar
+(function(){
+  const arr = diger.filter(d=>["Troponin","NT-Pro BNP"].includes(d.tetkik));
+  Plotly.newPlot('bar_kardiyak', [
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
+     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
+     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+})();
+
+  // 11) Acil serviste yeri olmayan tetkikler – ikili bar
+(function(){
+  const arr = diger.filter(d=>["eGFR","Fosfor","Magnezyum","Klor","CK-MB","Ürik Asit","Sedimentasyon","Fibrinojen"].includes(d.tetkik));
+  Plotly.newPlot('bar_gereksiz', [
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
+     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
+     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], {...layoutBase, barmode:'group', margin:{l:160,r:20,t:10,b:40}, xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+})();
+
+
 </script>
 </body>
 </html>
