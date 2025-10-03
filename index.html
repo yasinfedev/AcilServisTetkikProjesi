@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <title>Acil Serviste Akılcı Tetkik İstemi – Veri Paneli - Uzm.Dr.Yasin YILDIZ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Plotly -->
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:#0b1220; color:#f2f5fa}
+    header{padding:20px 24px; border-bottom:1px solid #1f2a44}
+    h1{font-size:20px; margin:0 0 6px}
+    .sub{opacity:.8; font-size:14px}
+    .grid{display:grid; grid-template-columns:repeat(12,1fr); gap:16px; padding:16px}
+    .card{background:#111a2e; border:1px solid #1f2a44; border-radius:12px; padding:12px}
+    .span-6{grid-column: span 6}
+    .span-12{grid-column: span 12}
+    .title{font-size:14px; margin:0 0 8px; color:#c7d2fe}
+    .foot{padding:8px 16px 24px; opacity:.7; font-size:12px}
+    a{color:#9bdcff}
+    @media (max-width:1100px){ .span-6{grid-column: span 12} }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Acil Serviste Akılcı Tetkik İstemi – Veri Görselleştirme Paneli</h1>
+  <div class="sub">Konya Şehir Hastanesi • Dönem: Eylül 2025 • Yazar: Uzm.Dr. Yasin Yıldız</div>
+</header>
+
+<div class="grid">
+
+  <!-- 1: Hasta dağılımları -->
+  <div class="card span-6">
+    <h3 class="title">Acil Servis Alanlarına Göre Hasta Dağılımı</h3>
+    <div id="pie_total"></div>
+  </div>
+
+  <div class="card span-6">
+    <h3 class="title">Erişkin Acil İç Dağılımı (Yeşil / Sarı / Ambulans)</h3>
+    <div id="pie_eriskin"></div>
+  </div>
+
+  <!-- 2: Dar / Geniş / Ek biyokimya – Acil istem sayıları -->
+  <div class="card span-6">
+    <h3 class="title">Dar Biyokimya Paneli – Acil İstem Sayıları</h3>
+    <div id="bar_dar"></div>
+  </div>
+
+  <div class="card span-6">
+    <h3 class="title">Geniş Biyokimya Paneli – Acil İstem Sayıları</h3>
+    <div id="bar_genis"></div>
+  </div>
+
+  <div class="card span-6">
+    <h3 class="title">Ek Biyokimya Paneli – Acil İstem Sayıları</h3>
+    <div id="bar_ek"></div>
+  </div>
+
+  <div class="card span-6">
+    <h3 class="title">%30 Üzeri Acil Payı Olan Tetkikler (Acil vs Hastane)</h3>
+    <div id="bar_over30"></div>
+  </div>
+
+  <!-- 3: Tüm testler – Acil vs Hastane, acil payına göre sıralı -->
+  <div class="card span-12">
+    <h3 class="title">Tüm Tetkikler – Acil Servis vs Hastane Toplam (Acil Payına Göre Sıralı)</h3>
+    <div id="bar_all"></div>
+  </div>
+
+  <!-- 4: Tekli örnekler -->
+  <div class="card span-6">
+    <h3 class="title">Tam İdrar Tahlili (TİT) – Acil vs Hastane</h3>
+    <div id="bar_tit"></div>
+  </div>
+
+  <div class="card span-6">
+    <h3 class="title">Kan Gazı – Acil vs Hastane</h3>
+    <div id="bar_kangazi"></div>
+  </div>
+
+</div>
+
+<div class="foot">
+  Not: Çubukların üzerine tıklayarak değerleri vurgulayabilir, eksen üstüne gelerek sayıları görebilirsiniz. 
+  Panel, <a href="https://plotly.com/javascript/" target="_blank">Plotly.js</a> ile oluşturulmuştur.
+</div>
+
+<script>
+/* ===================== VERİLER ===================== */
+// Hasta sayıları
+const hastaToplam = 83770;
+const eriskin = 56239, cocuk = 23812, kadin = 3719;
+const eriskinAlan = {
+  yesil: 36968,
+  sari: 14103,
+  ambulans: 5168
+};
+
+// Dar biyokimya (Acil)
+const dar = [
+  {tetkik:"Glukoz", acil:8633, hastane:38907},
+  {tetkik:"BUN", acil:8619, hastane:35988},
+  {tetkik:"Kreatinin", acil:8632, hastane:41857},
+  {tetkik:"ALT", acil:8640, hastane:40912},
+  {tetkik:"AST", acil:8635, hastane:37377},
+  {tetkik:"Sodyum", acil:8640, hastane:34971},
+  {tetkik:"Potasyum", acil:8131, hastane:33397}
+];
+
+// Geniş biyokimya (Acil)
+const genis = [
+  {tetkik:"GGT", acil:8588, hastane:37377},
+  {tetkik:"ALP", acil:2567, hastane:14480},
+  {tetkik:"LDH", acil:6789, hastane:19198},
+  {tetkik:"Direkt Bilirubin", acil:7665, hastane:17304},
+  {tetkik:"Total Bilirubin", acil:7666, hastane:17505},
+  {tetkik:"Amilaz", acil:7616, hastane:12801},
+  {tetkik:"Lipaz", acil:7618, hastane:12760}
+];
+
+// Ek biyokimya (Acil)
+const ek = [
+  {tetkik:"Albumin", acil:7313, hastane:21712},
+  {tetkik:"Kalsiyum", acil:6818, hastane:30560},
+  {tetkik:"Total Protein", acil:9, hastane:9305},
+  {tetkik:"CRP", acil:7346, hastane:26551},
+  {tetkik:"CK", acil:5342, hastane:10444},
+  {tetkik:"Amonyak", acil:7, hastane:32}
+];
+
+// Koagülasyon
+const koag = [
+  {tetkik:"D-dimer", acil:238, hastane:938},
+  {tetkik:"APTT", acil:3866, hastane:11226},
+  {tetkik:"Protrombin Zamanı", acil:11634, hastane:35514}
+];
+
+// Kardiyak / Kan gazı / Seroloji / Hemogram / TİT / Diğer
+const diger = [
+  {tetkik:"Hemogram", acil:30219, hastane:162304},
+  {tetkik:"Troponin", acil:5001, hastane:5869},
+  {tetkik:"NT-Pro BNP", acil:9, hastane:64},
+  {tetkik:"Kan Gazı", acil:41160, hastane:85068},
+  {tetkik:"Beta HCG", acil:647, hastane:4915},
+  {tetkik:"HBS Ag", acil:2349, hastane:10075},
+  {tetkik:"Anti HCV", acil:2373, hastane:10106},
+  {tetkik:"Anti HIV", acil:2372, hastane:9713},
+  {tetkik:"Tam İdrar Tahlili (TİT)", acil:3124, hastane:19760},
+  {tetkik:"eGFR", acil:8623, hastane:41741},
+  {tetkik:"Fosfor", acil:6801, hastane:20194},
+  {tetkik:"Magnezyum", acil:690, hastane:13141},
+  {tetkik:"Klor", acil:8616, hastane:19201},
+  {tetkik:"CK-MB", acil:5002, hastane:5703},
+  {tetkik:"Ürik Asit", acil:446, hastane:15530},
+  {tetkik:"Sedimentasyon", acil:31, hastane:6252},
+  {tetkik:"Fibrinojen", acil:12, hastane:716}
+];
+
+// Tüm testleri bir araya getir
+const allTests = [
+  ...diger,
+  ...dar, ...genis, ...ek, ...koag
+];
+
+// Acil Payı (%) ekle
+allTests.forEach(t=>{
+  t.pay = +(t.acil / t.hastane * 100).toFixed(1);
+});
+
+/* ===================== ÇİZİMLER ===================== */
+const layoutBase = {
+  paper_bgcolor:'#111a2e',
+  plot_bgcolor:'#111a2e',
+  font:{color:'#e7ecf7'},
+  margin:{l:100,r:20,t:10,b:40}
+};
+
+// 1) Hasta dağılımı pie
+Plotly.newPlot('pie_total', [{
+  type:'pie',
+  labels:['Erişkin Acil','Çocuk Acil','Kadın Acil'],
+  values:[eriskin, cocuk, kadin],
+  textinfo:'label+percent',
+  hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
+}], {
+  ...layoutBase,
+  legend:{orientation:'h', y:-0.1},
+});
+
+// 1b) Erişkin iç dağılım pie
+Plotly.newPlot('pie_eriskin', [{
+  type:'pie',
+  labels:['Yeşil Alan','Sarı Alan','Ambulans'],
+  values:[eriskinAlan.yesil, eriskinAlan.sari, eriskinAlan.ambulans],
+  textinfo:'label+percent',
+  hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
+}], {
+  ...layoutBase,
+  legend:{orientation:'h', y:-0.1},
+});
+
+// 2) Panel grafikleri – tekli (Acil)
+function barH(container, arr, titleY) {
+  const x = arr.map(d=>d.acil);
+  const y = arr.map(d=>d.tetkik);
+  Plotly.newPlot(container, [{
+    type:'bar',
+    orientation:'h',
+    x, y,
+    text: x.map(v=>v.toLocaleString('tr-TR')),
+    textposition:'outside',
+    hovertemplate:'%{y}<br>Acil: %{x:n}<extra></extra>'
+  }], {
+    ...layoutBase,
+    margin:{l:140,r:20,t:10,b:40},
+    xaxis:{title:'Acil İstem Sayısı'},
+    yaxis:{title:titleY}
+  });
+}
+barH('bar_dar', dar, '');
+barH('bar_genis', genis, '');
+barH('bar_ek', ek, '');
+
+// 3) %30 üzeri acil payı – ikili bar (Acil vs Hastane)
+const over30 = allTests.filter(t=>t.pay>30).sort((a,b)=>a.pay-b.pay);
+Plotly.newPlot('bar_over30', [
+  {
+    type:'bar', orientation:'h',
+    y: over30.map(d=>d.tetkik),
+    x: over30.map(d=>d.acil),
+    name:'Acil Servis',
+    text: over30.map(d=>d.acil.toLocaleString('tr-TR')),
+    textposition:'outside',
+    hovertemplate:'%{y}<br>Acil: %{x:n}<extra></extra>'
+  },
+  {
+    type:'bar', orientation:'h',
+    y: over30.map(d=>d.tetkik),
+    x: over30.map(d=>d.hastane),
+    name:'Hastane Toplam',
+    text: over30.map(d=>d.hastane.toLocaleString('tr-TR')),
+    textposition:'outside',
+    hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'
+  }
+], {
+  ...layoutBase,
+  barmode:'group',
+  margin:{l:170,r:20,t:10,b:40},
+  xaxis:{title:'İstem Sayısı'},
+  legend:{orientation:'h', y:-0.15}
+});
+
+// 4) Tüm testler – ikili bar, acil payına göre sıralı
+const allSorted = [...allTests].sort((a,b)=>a.pay-b.pay);
+Plotly.newPlot('bar_all', [
+  {
+    type:'bar', orientation:'h',
+    y: allSorted.map(d=>d.tetkik),
+    x: allSorted.map(d=>d.acil),
+    name:'Acil Servis',
+    text: allSorted.map(d=>`${d.acil.toLocaleString('tr-TR')} (${d.pay}%)`),
+    textposition:'outside',
+    hovertemplate:'%{y}<br>Acil: %{x:n} • Pay: '+ '%{customdata}%' + '<extra></extra>',
+    customdata: allSorted.map(d=>d.pay)
+  },
+  {
+    type:'bar', orientation:'h',
+    y: allSorted.map(d=>d.tetkik),
+    x: allSorted.map(d=>d.hastane),
+    name:'Hastane Toplam',
+    text: allSorted.map(d=>d.hastane.toLocaleString('tr-TR')),
+    textposition:'outside',
+    hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'
+  }
+], {
+  ...layoutBase,
+  barmode:'group',
+  margin:{l:230,r:20,t:10,b:40},
+  xaxis:{title:'İstem Sayısı'},
+  legend:{orientation:'h', y:-0.2}
+});
+
+// 5) TİT – ikili bar
+(function(){
+  const t = allTests.find(d=>d.tetkik==="Tam İdrar Tahlili (TİT)");
+  Plotly.newPlot('bar_tit', [
+    {type:'bar', orientation:'h', y:['TİT'], x:[t.acil], name:'Acil Servis', text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
+    {type:'bar', orientation:'h', y:['TİT'], x:[t.hastane], name:'Hastane Toplam', text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
+  ], {
+    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}
+  });
+})();
+
+// 6) Kan Gazı – ikili bar
+(function(){
+  const t = allTests.find(d=>d.tetkik==="Kan Gazı");
+  Plotly.newPlot('bar_kangazi', [
+    {type:'bar', orientation:'h', y:['Kan Gazı'], x:[t.acil], name:'Acil Servis', text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
+    {type:'bar', orientation:'h', y:['Kan Gazı'], x:[t.hastane], name:'Hastane Toplam', text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
+  ], {
+    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}
+  });
+})();
+</script>
+</body>
+</html>
