@@ -7,6 +7,7 @@
   <!-- Plotly -->
   <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
   <style>
+    :root{scroll-behavior:smooth}
     body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin:0; background:#0b1220; color:#f2f5fa}
     header{padding:20px 24px; border-bottom:1px solid #1f2a44}
     h1{font-size:20px; margin:0 0 6px}
@@ -19,10 +20,27 @@
     .foot{padding:8px 16px 24px; opacity:.7; font-size:12px}
     a{color:#9bdcff}
     @media (max-width:1100px){ .span-6{grid-column: span 12} }
+
+    /* Yeni: üstte hızlı geçiş çubuğu */
+    .toolbar{
+      position:sticky; top:0; z-index:50;
+      background:rgba(17,26,46,.9); backdrop-filter:saturate(150%) blur(6px);
+      border-bottom:1px solid #1f2a44; padding:10px 16px; display:flex; gap:10px; align-items:center
+    }
+    .toolbar label{font-size:14px; opacity:.85}
+    .toolbar select,.toolbar button{
+      background:#0e172b; color:#e7ecf7; border:1px solid #253256; border-radius:10px; padding:8px 10px; font-size:14px
+    }
+    .toolbar button{cursor:pointer}
+    .topbtn{
+      margin-top:10px; background:#0e172b; color:#e7ecf7; border:1px solid #253256;
+      border-radius:10px; padding:6px 10px; font-size:12px; cursor:pointer
+    }
+    .topbtn:hover,.toolbar button:hover{border-color:#3852a3}
   </style>
 </head>
 <body>
-<header>
+<header id="pageTop">
   <h1>Acil Serviste Akılcı Tetkik İstemi – Veri Görselleştirme Paneli - 04.10.2025 - Konya</h1>
   <div class="sub">Konya Şehir Hastanesi Acil Tıp Kliniği • <b>Dönem:</b> Eylül 2025 • <b>Veri analizi & kodlama:</b> Uzm.Dr. Yasin Yıldız • <b>Danışman:</b> Prof.Dr. Mehmet Gül</div>
   <hr>
@@ -30,91 +48,124 @@
   <hr>
 </header>
 
+<!-- YENİ: Hızlı Geçiş menüsü -->
+<div class="toolbar">
+  <label for="jumpSelect">Kart seç ve git:</label>
+  <select id="jumpSelect">
+    <option value="">Bir bölüm seçin…</option>
+    <option value="card_pie_total">Hasta Dağılımı – Alanlar</option>
+    <option value="card_pie_eriskin">Erişkin Acil İç Dağılımı</option>
+    <option value="card_hemogram">Hemogram – Acil vs Hastane</option>
+    <option value="card_dar">Dar Biyokimya – Acil</option>
+    <option value="card_genis">Geniş Biyokimya – Acil</option>
+    <option value="card_ek">Ek Biyokimya – Acil</option>
+    <option value="card_over30">%30+ Acil Payı – İkili</option>
+    <option value="card_koag">Koagülasyon – İkili</option>
+    <option value="card_seroloji">Seroloji – İkili</option>
+    <option value="card_kardiyak">Kardiyak – İkili</option>
+    <option value="card_tit">TİT – İkili</option>
+    <option value="card_kangazi">Kan Gazı – İkili</option>
+    <option value="card_gereksiz">Acilde Yeri Olmayanlar – İkili</option>
+    <option value="card_all">Tüm Tetkikler – İkili (Sıralı)</option>
+  </select>
+  <button id="goBtn">Git</button>
+  <button onclick="scrollToTop()">Sayfa başına git</button>
+</div>
+
 <div class="grid">
 
   <!-- 1: Hasta dağılımları -->
-  <div class="card span-6">
+  <div class="card span-6" id="card_pie_total">
     <h3 class="title">Acil Servis Alanlarına Göre Hasta Dağılımı</h3>
     <div id="pie_total"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-  <div class="card span-6">
+  <div class="card span-6" id="card_pie_eriskin">
     <h3 class="title">Erişkin Acil İç Dağılımı (Yeşil / Sarı / Ambulans)</h3>
     <div id="pie_eriskin"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-    <!-- Hemogram grafiği -->
-  <div class="card span-6">
+  <!-- Hemogram grafiği -->
+  <div class="card span-6" id="card_hemogram">
     <h3 class="title">Hemogram – Acil vs Hastane</h3>
     <div id="bar_hemogram"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
-
 
   <!-- 2: Dar / Geniş / Ek biyokimya – Acil istem sayıları -->
-  <div class="card span-6">
+  <div class="card span-6" id="card_dar">
     <h3 class="title">Dar Biyokimya Paneli – Acil İstem Sayıları</h3>
     <div id="bar_dar"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-  <div class="card span-6">
+  <div class="card span-6" id="card_genis">
     <h3 class="title">Geniş Biyokimya Paneli – Acil İstem Sayıları</h3>
     <div id="bar_genis"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-  <div class="card span-6">
+  <div class="card span-6" id="card_ek">
     <h3 class="title">Ek Biyokimya Paneli – Acil İstem Sayıları</h3>
     <div id="bar_ek"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-  <div class="card span-6">
+  <div class="card span-6" id="card_over30">
     <h3 class="title">%30 Üzeri Acil Payı Olan Tetkikler (Acil vs Hastane)</h3>
     <div id="bar_over30"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-    <!-- Koagülasyon -->
-  <div class="card span-6">
+  <!-- Koagülasyon -->
+  <div class="card span-6" id="card_koag">
     <h3 class="title">Koagülasyon Tetkikleri – Acil vs Hastane</h3>
     <div id="bar_koag"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
   <!-- Seroloji -->
-  <div class="card span-6">
+  <div class="card span-6" id="card_seroloji">
     <h3 class="title">Seroloji – Acil vs Hastane</h3>
     <div id="bar_seroloji"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
   <!-- Kardiyak -->
-  <div class="card span-6">
+  <div class="card span-6" id="card_kardiyak">
     <h3 class="title">Kardiyak Tetkikler – Acil vs Hastane</h3>
     <div id="bar_kardiyak"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-   <!-- 4: Tekli örnekler -->
-  <div class="card span-6">
+  <!-- 4: Tekli örnekler -->
+  <div class="card span-6" id="card_tit">
     <h3 class="title">Tam İdrar Tahlili (TİT) – Acil vs Hastane</h3>
     <div id="bar_tit"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-  <div class="card span-6">
+  <div class="card span-6" id="card_kangazi">
     <h3 class="title">Kan Gazı – Acil vs Hastane</h3>
     <div id="bar_kangazi"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
 
-    <!-- Acil serviste yeri olmayan tetkikler -->
-  <div class="card span-12">
+  <!-- Acil serviste yeri olmayan tetkikler -->
+  <div class="card span-12" id="card_gereksiz">
     <h3 class="title">Acil Serviste Yeri Olmayan Tetkikler – Acil vs Hastane</h3>
     <div id="bar_gereksiz"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
-
-
 
   <!-- 3: Tüm testler – Acil vs Hastane, acil payına göre sıralı -->
-  <div class="card span-12">
+  <div class="card span-12" id="card_all">
     <h3 class="title">Tüm Tetkikler – Acil Servis vs Hastane Toplam (Acil Payına Göre Sıralı)</h3>
     <div id="bar_all"></div>
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
   </div>
-
- 
 
 </div>
 
@@ -122,24 +173,33 @@
   Not: Çubukların üzerine tıklayarak değerleri vurgulayabilir, eksen üstüne gelerek sayıları görebilirsiniz. 
   Panel, <a href="https://plotly.com/javascript/" target="_blank">Plotly.js</a> ile oluşturulmuştur.
 </div>
-  <hr>
-  <div class="foot">
-  Veri analizi, göreselleştirme, HTML, JavaScript ve Python kodlama: <b><mark>Uzm.Dr.Yasin Yıldız</mark></b> © 2025.<br>
+<hr>
+<div class="foot">
+  Veri analizi, görselleştirme, HTML, JavaScript ve Python kodlama: <b><mark>Uzm.Dr.Yasin Yıldız</mark></b> © 2025.<br>
   <b>Konya Şehir Hastanesi Acil Tıp Kliniği</b> Websitesi için, <a href="https://acil42.com/" target="_blank">buraya tıklayınız</a>.
+  <div style="margin-top:10px">
+    <button class="topbtn" onclick="scrollToTop()">Sayfa başına git</button>
+  </div>
 </div>
 
 <script>
+/* ===================== Yardımcı: Hızlı Geçiş ===================== */
+function scrollToTop(){ window.scrollTo({top:0, behavior:'smooth'}); }
+document.getElementById('goBtn').addEventListener('click', ()=>{
+  const targetId = document.getElementById('jumpSelect').value;
+  if(targetId){
+    const el = document.getElementById(targetId);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+});
+// Seçim değişince de otomatik gitmek istersen yorum satırını aç:
+// document.getElementById('jumpSelect').addEventListener('change', ()=> document.getElementById('goBtn').click());
+
 /* ===================== VERİLER ===================== */
-// Hasta sayıları
 const hastaToplam = 83770;
 const eriskin = 56239, cocuk = 23812, kadin = 3719;
-const eriskinAlan = {
-  yesil: 36968,
-  sari: 14103,
-  ambulans: 5168
-};
+const eriskinAlan = { yesil: 36968, sari: 14103, ambulans: 5168 };
 
-// Dar biyokimya (Acil)
 const dar = [
   {tetkik:"Glukoz", acil:8633, hastane:38907},
   {tetkik:"BUN", acil:8619, hastane:35988},
@@ -150,7 +210,6 @@ const dar = [
   {tetkik:"Potasyum", acil:8131, hastane:33397}
 ];
 
-// Geniş biyokimya (Acil)
 const genis = [
   {tetkik:"GGT", acil:8588, hastane:37377},
   {tetkik:"ALP", acil:2567, hastane:14480},
@@ -161,7 +220,6 @@ const genis = [
   {tetkik:"Lipaz", acil:7618, hastane:12760}
 ];
 
-// Ek biyokimya (Acil)
 const ek = [
   {tetkik:"Albumin", acil:7313, hastane:21712},
   {tetkik:"Kalsiyum", acil:6818, hastane:30560},
@@ -171,16 +229,12 @@ const ek = [
   {tetkik:"Amonyak", acil:7, hastane:32}
 ];
 
-  
-
-// Koagülasyon
 const koag = [
   {tetkik:"D-dimer", acil:238, hastane:938},
   {tetkik:"APTT", acil:3866, hastane:11226},
   {tetkik:"Protrombin Zamanı", acil:11634, hastane:35514}
 ];
 
-// Kardiyak / Kan gazı / Seroloji / Hemogram / TİT / Diğer
 const diger = [
   {tetkik:"Hemogram", acil:30219, hastane:162304},
   {tetkik:"Troponin", acil:5001, hastane:5869},
@@ -201,129 +255,64 @@ const diger = [
   {tetkik:"Fibrinojen", acil:12, hastane:716}
 ];
 
-// Tüm testleri bir araya getir
-const allTests = [
-  ...diger,
-  ...dar, ...genis, ...ek, ...koag
-];
-
-// Acil Payı (%) ekle
-allTests.forEach(t=>{
-  t.pay = +(t.acil / t.hastane * 100).toFixed(1);
-});
+const allTests = [ ...diger, ...dar, ...genis, ...ek, ...koag ];
+allTests.forEach(t=>{ t.pay = +(t.acil / t.hastane * 100).toFixed(1); });
 
 /* ===================== ÇİZİMLER ===================== */
 const layoutBase = {
-  paper_bgcolor:'#111a2e',
-  plot_bgcolor:'#111a2e',
-  font:{color:'#e7ecf7'},
-  margin:{l:100,r:20,t:10,b:40}
+  paper_bgcolor:'#111a2e', plot_bgcolor:'#111a2e',
+  font:{color:'#e7ecf7'}, margin:{l:100,r:20,t:10,b:40}
 };
 
 // 1) Hasta dağılımı pie
 Plotly.newPlot('pie_total', [{
-  type:'pie',
-  labels:['Erişkin Acil','Çocuk Acil','Kadın Acil'],
+  type:'pie', labels:['Erişkin Acil','Çocuk Acil','Kadın Acil'],
   values:[eriskin, cocuk, kadin],
-  textinfo:'label+percent',
-  hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
-}], {
-  ...layoutBase,
-  legend:{orientation:'h', y:-0.1},
-});
+  textinfo:'label+percent', hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
+}], { ...layoutBase, legend:{orientation:'h', y:-0.1} });
 
 // 1b) Erişkin iç dağılım pie
 Plotly.newPlot('pie_eriskin', [{
-  type:'pie',
-  labels:['Yeşil Alan','Sarı Alan','Ambulans'],
+  type:'pie', labels:['Yeşil Alan','Sarı Alan','Ambulans'],
   values:[eriskinAlan.yesil, eriskinAlan.sari, eriskinAlan.ambulans],
-  textinfo:'label+percent',
-  hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
-}], {
-  ...layoutBase,
-  legend:{orientation:'h', y:-0.1},
-});
+  textinfo:'label+percent', hovertemplate:'%{label}<br>%{value:n} hasta<extra></extra>'
+}], { ...layoutBase, legend:{orientation:'h', y:-0.1} });
 
 // 2) Panel grafikleri – tekli (Acil)
 function barH(container, arr, titleY) {
   const x = arr.map(d=>d.acil);
   const y = arr.map(d=>d.tetkik);
   Plotly.newPlot(container, [{
-    type:'bar',
-    orientation:'h',
-    x, y,
-    text: x.map(v=>v.toLocaleString('tr-TR')),
-    textposition:'outside',
+    type:'bar', orientation:'h', x, y,
+    text: x.map(v=>v.toLocaleString('tr-TR')), textposition:'outside',
     hovertemplate:'%{y}<br>Acil: %{x:n}<extra></extra>'
-  }], {
-    ...layoutBase,
-    margin:{l:140,r:20,t:10,b:40},
-    xaxis:{title:'Acil İstem Sayısı'},
-    yaxis:{title:titleY}
-  });
+  }], { ...layoutBase, margin:{l:140,r:20,t:10,b:40}, xaxis:{title:'Acil İstem Sayısı'}, yaxis:{title:titleY} });
 }
 barH('bar_dar', dar, '');
 barH('bar_genis', genis, '');
 barH('bar_ek', ek, '');
 
-// 3) %30 üzeri acil payı – ikili bar (Acil vs Hastane)
+// 3) %30 üzeri acil payı – ikili bar
 const over30 = allTests.filter(t=>t.pay>30).sort((a,b)=>a.pay-b.pay);
 Plotly.newPlot('bar_over30', [
-  {
-    type:'bar', orientation:'h',
-    y: over30.map(d=>d.tetkik),
-    x: over30.map(d=>d.acil),
-    name:'Acil Servis',
-    text: over30.map(d=>d.acil.toLocaleString('tr-TR')),
-    textposition:'outside',
-    hovertemplate:'%{y}<br>Acil: %{x:n}<extra></extra>'
-  },
-  {
-    type:'bar', orientation:'h',
-    y: over30.map(d=>d.tetkik),
-    x: over30.map(d=>d.hastane),
-    name:'Hastane Toplam',
-    text: over30.map(d=>d.hastane.toLocaleString('tr-TR')),
-    textposition:'outside',
-    hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'
-  }
-], {
-  ...layoutBase,
-  barmode:'group',
-  margin:{l:170,r:20,t:10,b:40},
-  xaxis:{title:'İstem Sayısı'},
-  legend:{orientation:'h', y:-0.15}
-});
+  {type:'bar', orientation:'h', y:over30.map(d=>d.tetkik), x:over30.map(d=>d.acil), name:'Acil Servis',
+   text:over30.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside',
+   hovertemplate:'%{y}<br>Acil: %{x:n}<extra></extra>'},
+  {type:'bar', orientation:'h', y:over30.map(d=>d.tetkik), x:over30.map(d=>d.hastane), name:'Hastane Toplam',
+   text:over30.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside',
+   hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'}
+], { ...layoutBase, barmode:'group', margin:{l:170,r:20,t:10,b:40}, xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.15} });
 
-// 4) Tüm testler – ikili bar, acil payına göre sıralı
+// 4) Tüm testler – ikili bar
 const allSorted = [...allTests].sort((a,b)=>a.pay-b.pay);
 Plotly.newPlot('bar_all', [
-  {
-    type:'bar', orientation:'h',
-    y: allSorted.map(d=>d.tetkik),
-    x: allSorted.map(d=>d.acil),
-    name:'Acil Servis',
-    text: allSorted.map(d=>`${d.acil.toLocaleString('tr-TR')} (${d.pay}%)`),
-    textposition:'outside',
-    hovertemplate:'%{y}<br>Acil: %{x:n} • Pay: '+ '%{customdata}%' + '<extra></extra>',
-    customdata: allSorted.map(d=>d.pay)
-  },
-  {
-    type:'bar', orientation:'h',
-    y: allSorted.map(d=>d.tetkik),
-    x: allSorted.map(d=>d.hastane),
-    name:'Hastane Toplam',
-    text: allSorted.map(d=>d.hastane.toLocaleString('tr-TR')),
-    textposition:'outside',
-    hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'
-  }
-], {
-  ...layoutBase,
-  barmode:'group',
-  margin:{l:230,r:20,t:10,b:40},
-  xaxis:{title:'İstem Sayısı'},
-  legend:{orientation:'h', y:-0.2}
-});
+  {type:'bar', orientation:'h', y:allSorted.map(d=>d.tetkik), x:allSorted.map(d=>d.acil), name:'Acil Servis',
+   text:allSorted.map(d=>`${d.acil.toLocaleString('tr-TR')} (${d.pay}%)`), textposition:'outside',
+   hovertemplate:'%{y}<br>Acil: %{x:n} • Pay: '+'%{customdata}%<extra></extra>', customdata:allSorted.map(d=>d.pay)},
+  {type:'bar', orientation:'h', y:allSorted.map(d=>d.tetkik), x:allSorted.map(d=>d.hastane), name:'Hastane Toplam',
+   text:allSorted.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside',
+   hovertemplate:'%{y}<br>Toplam: %{x:n}<extra></extra>'}
+], { ...layoutBase, barmode:'group', margin:{l:230,r:20,t:10,b:40}, xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 
 // 5) TİT – ikili bar
 (function(){
@@ -331,9 +320,7 @@ Plotly.newPlot('bar_all', [
   Plotly.newPlot('bar_tit', [
     {type:'bar', orientation:'h', y:['TİT'], x:[t.acil], name:'Acil Servis', text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
     {type:'bar', orientation:'h', y:['TİT'], x:[t.hastane], name:'Hastane Toplam', text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
-  ], {
-    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}
-  });
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
 // 6) Kan Gazı – ikili bar
@@ -342,70 +329,53 @@ Plotly.newPlot('bar_all', [
   Plotly.newPlot('bar_kangazi', [
     {type:'bar', orientation:'h', y:['Kan Gazı'], x:[t.acil], name:'Acil Servis', text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
     {type:'bar', orientation:'h', y:['Kan Gazı'], x:[t.hastane], name:'Hastane Toplam', text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
-  ], {
-    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}
-  });
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
-  // 7) Hemogram – ikili bar
+// 7) Hemogram – ikili bar
 (function(){
   const t = allTests.find(d=>d.tetkik==="Hemogram");
   Plotly.newPlot('bar_hemogram', [
-    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.acil], name:'Acil Servis', 
-     text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
-    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.hastane], name:'Hastane Toplam', 
-     text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
-  ], {
-    ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, 
-    legend:{orientation:'h', y:-0.2}
-  });
+    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.acil], name:'Acil Servis', text:[t.acil.toLocaleString('tr-TR')], textposition:'outside'},
+    {type:'bar', orientation:'h', y:['Hemogram'], x:[t.hastane], name:'Hastane Toplam', text:[t.hastane.toLocaleString('tr-TR')], textposition:'outside'}
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
-  // 8) Koagülasyon – ikili bar (APTT, D-dimer, PTZ)
+// 8) Koagülasyon – ikili bar
 (function(){
   const arr = koag;
   Plotly.newPlot('bar_koag', [
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
-     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
-     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
-  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis', text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam', text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
 // 9) Seroloji – ikili bar
 (function(){
   const arr = diger.filter(d=>["Beta HCG","HBS Ag","Anti HCV","Anti HIV"].includes(d.tetkik));
   Plotly.newPlot('bar_seroloji', [
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
-     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
-     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
-  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis', text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam', text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
 // 10) Kardiyak – ikili bar
 (function(){
   const arr = diger.filter(d=>["Troponin","NT-Pro BNP"].includes(d.tetkik));
   Plotly.newPlot('bar_kardiyak', [
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
-     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
-     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
-  ], {...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis', text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam', text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], { ...layoutBase, barmode:'group', xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
 
-  // 11) Acil serviste yeri olmayan tetkikler – ikili bar
+// 11) Acilde yeri olmayanlar – ikili bar
 (function(){
   const arr = diger.filter(d=>["eGFR","Fosfor","Magnezyum","Klor","CK-MB","Ürik Asit","Sedimentasyon","Fibrinojen"].includes(d.tetkik));
   Plotly.newPlot('bar_gereksiz', [
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis',
-     text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
-    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam',
-     text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
-  ], {...layoutBase, barmode:'group', margin:{l:160,r:20,t:10,b:40}, xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2}});
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.acil), name:'Acil Servis', text:arr.map(d=>d.acil.toLocaleString('tr-TR')), textposition:'outside'},
+    {type:'bar', orientation:'h', y:arr.map(d=>d.tetkik), x:arr.map(d=>d.hastane), name:'Hastane Toplam', text:arr.map(d=>d.hastane.toLocaleString('tr-TR')), textposition:'outside'}
+  ], { ...layoutBase, barmode:'group', margin:{l:160,r:20,t:10,b:40}, xaxis:{title:'İstem Sayısı'}, legend:{orientation:'h', y:-0.2} });
 })();
-
-
 </script>
 </body>
 </html>
